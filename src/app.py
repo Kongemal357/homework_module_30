@@ -3,7 +3,7 @@ from typing import List, Optional, Sequence
 
 import src.models
 import src.schemas
-from database import close_engine, engine, get_session
+from src.database import close_engine, engine, get_session
 from fastapi import Depends, FastAPI, Path
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
