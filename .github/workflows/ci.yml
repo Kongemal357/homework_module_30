@@ -1,0 +1,43 @@
+name: Python CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: |
+          pytest tests
+
+      - name: Run mypy
+        run: |
+          mypy src/
+
+      - name: Run black diff check
+        run: |
+          black --diff --check src/
+
+      - name: Run isort diff check
+        run: |
+          isort --profile black --check-only --diff src/
+
+      - name: Run flake8
+        run: |
+          flake8 src/
