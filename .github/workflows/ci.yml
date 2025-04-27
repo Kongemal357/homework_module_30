@@ -27,6 +27,10 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: List directory contents (debugging)
+        run: |
+          ls -R  # Выведет структуру проекта, чтобы проверить наличие тестов
+
       - name: Set PYTHONPATH
         run: |
           export PYTHONPATH=$(pwd)/src
@@ -34,7 +38,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          pytest tests
+          pytest --maxfail=1 --disable-warnings -q 
 
       - name: Run mypy
         run: |
