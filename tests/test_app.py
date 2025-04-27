@@ -1,5 +1,5 @@
 import pytest
-from src/app import app
+from src.app import app
 from httpx import ASGITransport, AsyncClient
 
 
