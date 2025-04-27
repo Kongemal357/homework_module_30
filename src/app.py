@@ -39,7 +39,7 @@ async def get_recipe(
     recipe = res.scalars().first()
 
     if not recipe:
-        return None
+        raise HTTPException(status_code=404, detail="Item not found")
 
     await session.execute(
         update(models.Recipes)
