@@ -1,21 +1,59 @@
 import pytest
-from src.app import app
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
 
+from src.app import app
+from src.database import Base, get_db
+from src.models import Recipe  
+
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+@pytest.fixture
+async def engine():
+    engine = create_async_engine(TEST_DATABASE_URL)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield engine
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
+
+@pytest.fixture
+async def session(engine):
+    async_session = sessionmaker(
+        engine, expire_on_commit=False, class_=AsyncSession
+    )
+    async with async_session() as session:
+        yield session
+
+@pytest.fixture
+async def override_get_db(session):
+    async def _override_get_db():
+        yield session
+
+    return _override_get_db
+
+@pytest.fixture
+async def client(override_get_db):
+    app.dependency_overrides[get_db] = override_get_db
+    
+    async with AsyncClient(
+        transport=ASGITransport(app=app), 
+        base_url="http://test"
+    ) as client:
+        yield client
+    app.dependency_overrides.clear()
 
 @pytest.mark.asyncio
-async def test_get_recipes_empty():
+async def test_get_recipes_empty(client):
     """Тестируем GET /recipes (если нет рецептов)"""
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
-        response = await client.get("/recipes")
+    response = await client.get("/recipes")
     assert response.status_code == 200
     assert response.json() == []
 
-
 @pytest.mark.asyncio
-async def test_post_recipe():
+async def test_post_recipe(client):
     """Тестируем POST /recipes (добавление нового рецепта)"""
     new_recipe = {
         "title": "Test Recipe",
@@ -23,30 +61,22 @@ async def test_post_recipe():
         "ingredients": "Flour, Water, Salt",
         "description": "Simple test recipe",
     }
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
-        response = await client.post("/recipes", json=new_recipe)
-
+    response = await client.post("/recipes", json=new_recipe)
+    
     assert response.status_code == 200
     json_data = response.json()
     assert json_data["title"] == new_recipe["title"]
     assert json_data["cooking_time"] == new_recipe["cooking_time"]
 
-
 @pytest.mark.asyncio
-async def test_get_recipe_not_found():
+async def test_get_recipe_not_found(client):
     """Тестируем GET /recipes/{id} с несуществующим ID"""
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
-        response = await client.get("/recipes/999")
+    response = await client.get("/recipes/999")
     assert response.status_code == 200
     assert response.json() is None
 
-
 @pytest.mark.asyncio
-async def test_get_recipe_existing():
+async def test_get_recipe_existing(client):
     """Тестируем GET /recipes/{id} с существующим рецептом"""
     new_recipe = {
         "title": "Test Recipe 2",
@@ -55,13 +85,10 @@ async def test_get_recipe_existing():
         "description": "Another test recipe",
     }
 
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
-        post_response = await client.post("/recipes", json=new_recipe)
-        recipe_id = post_response.json()["id"]
+    post_response = await client.post("/recipes", json=new_recipe)
+    recipe_id = post_response.json()["id"]
 
-        get_response = await client.get(f"/recipes/{recipe_id}")
-
+    get_response = await client.get(f"/recipes/{recipe_id}")
+    
     assert get_response.status_code == 200
     assert get_response.json()["title"] == new_recipe["title"]
