@@ -7,7 +7,7 @@ class BaseRecipes(BaseModel):
 
 
 class RecipesListOut(BaseRecipes):
-    """Model for the recipe list"""
+    """Model for a list of recipes"""
 
     views: int = Field(..., title="Number of times the recipe has been viewed", ge=0)
 
