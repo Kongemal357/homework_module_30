@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 from typing import List, Optional, Sequence
 
-import models
-import schemas
+import src.models
+import src.schemas
 from database import close_engine, engine, get_session
 from fastapi import Depends, FastAPI, Path
 from sqlalchemy import select, update
