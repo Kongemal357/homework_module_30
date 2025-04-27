@@ -11,6 +11,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}/src
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,6 +26,11 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Set PYTHONPATH
+        run: |
+          export PYTHONPATH=$(pwd)/src
+          python -m unittest discover tests
 
       - name: Run unit tests
         run: |
