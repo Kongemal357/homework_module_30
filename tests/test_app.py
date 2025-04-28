@@ -7,10 +7,8 @@ from tests.conftest import client, test_recipe
 
 @pytest.mark.asyncio
 async def test_get_list_of_recipes(client, test_recipe):
-    """Тестируем GET /recipes/{id}"""
-    response = await client.get(f"/recipes/")
-    print(response.url)  # Печатает конечный URL
-    print(response.text)
+    """Тестируем GET /recipes"""
+    response = await client.get("/recipes")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
@@ -29,7 +27,7 @@ async def test_post_recipe(client):
     data = response.json()
     assert data["title"] == new_recipe["title"]
     
-    response = await client.get(f"/recipes/")
+    response = await client.get("/recipes")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 3
