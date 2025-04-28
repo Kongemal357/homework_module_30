@@ -17,10 +17,7 @@ async def lifespan(app: FastAPI):
     await close_engine()
 
 
-app = FastAPI(
-    lifespan=lifespan,
-    redirect_slashes=False
-)
+app = FastAPI(lifespan=lifespan, redirect_slashes=False)
 
 
 @app.get("/recipes", response_model=List[schemas.RecipesListOut])
