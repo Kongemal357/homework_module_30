@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.tests.conftest import client, test_recipe
+from tests.conftest import client, test_recipe
 
 @pytest.mark.asyncio
 async def test_post_recipe(client):
