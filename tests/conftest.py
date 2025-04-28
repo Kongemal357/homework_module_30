@@ -50,7 +50,7 @@ async def test_recipe(session):
         views=0
     )
     recipe_2 = Recipes(
-        title="Test Recipe",
+        title="Test Recipe 2",
         cooking_time=30,
         ingredients="Test ingredients",
         description="Test description",
@@ -59,4 +59,4 @@ async def test_recipe(session):
     session.add(recipe_1)
     session.add(recipe_2)
     await session.commit()
-    return recipe
+    return recipe_1
