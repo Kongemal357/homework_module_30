@@ -9,6 +9,8 @@ from tests.conftest import client, test_recipe
 async def test_get_list_of_recipes(client, test_recipe):
     """Тестируем GET /recipes/{id}"""
     response = await client.get(f"/recipes/")
+    print(response.url)  # Печатает конечный URL
+    print(response.text)
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
