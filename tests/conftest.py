@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 
 from src.app import app
 from src.database import Base, get_session
+from src.models import Recipes
 
 DATABASE_URL_TEST = "sqlite+aiosqlite:///./test.db"
 
@@ -37,3 +38,16 @@ async def client() -> AsyncClient:
     """Клиент для запросов к приложению."""
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
+
+@pytest.fixture
+async def test_recipe(session):
+    recipe = Recipe(
+        title="Test Recipe",
+        cooking_time=30,
+        ingredients="Test ingredients",
+        description="Test description",
+        views=0
+    )
+    session.add(recipe)
+    await session.commit()
+    return recipe
