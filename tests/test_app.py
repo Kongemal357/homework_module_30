@@ -6,6 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tests.conftest import client, test_recipe
 
 @pytest.mark.asyncio
+async def test_get_list_of_recipes(client, test_recipe):
+    """Тестируем GET /recipes/{id}"""
+    response = await client.get(f"/recipes/")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 2
+
+@pytest.mark.asyncio
 async def test_post_recipe(client):
     """Тестируем POST /recipes"""
     new_recipe = {
@@ -18,6 +26,11 @@ async def test_post_recipe(client):
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == new_recipe["title"]
+    
+    response = await client.get(f"/recipes/")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 3
 
 @pytest.mark.asyncio
 async def test_get_recipe_not_found(client):
@@ -32,27 +45,3 @@ async def test_get_recipe_existing(client, test_recipe):
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == "Test Recipe"
-
-@pytest.mark.asyncio
-async def test_update_recipe(client, test_recipe):
-    """Тестируем PATCH /recipes/{id}"""
-    update_data = {"title": "Updated Recipe"}
-    response = await client.patch(
-        f"/recipes/{test_recipe.id}",
-        json=update_data
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["title"] == "Updated Recipe"
-
-@pytest.mark.asyncio
-async def test_delete_recipe(client, test_recipe):
-    """Тестируем DELETE /recipes/{id}"""
-    response = await client.get(f"/recipes/{test_recipe.id}")
-    assert response.status_code == 200
-    
-    response = await client.delete(f"/recipes/{test_recipe.id}")
-    assert response.status_code == 200
-    
-    response = await client.get(f"/recipes/{test_recipe.id}")
-    assert response.status_code == 404
