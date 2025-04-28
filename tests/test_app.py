@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app import app
 from src.database import Base, get_session
-from src.models import Recipe
+from src.models import Recipes
 
 
 @pytest.fixture(scope="function")
@@ -36,7 +36,7 @@ async def client(db_session):
 
 @pytest.fixture
 async def test_recipe(db_session):
-    recipe = Recipe(
+    recipe = Recipes(
         title="Test Recipe",
         cooking_time=30,
         ingredients="Test ingredients",
