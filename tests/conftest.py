@@ -42,13 +42,21 @@ async def client() -> AsyncClient:
 
 @pytest_asyncio.fixture
 async def test_recipe(session):
-    recipe = Recipes(
+    recipe_1 = Recipes(
         title="Test Recipe",
         cooking_time=30,
         ingredients="Test ingredients",
         description="Test description",
         views=0
     )
-    session.add(recipe)
+    recipe_2 = Recipes(
+        title="Test Recipe",
+        cooking_time=30,
+        ingredients="Test ingredients",
+        description="Test description",
+        views=0
+    )
+    session.add(recipe_1)
+    session.add(recipe_2)
     await session.commit()
     return recipe
