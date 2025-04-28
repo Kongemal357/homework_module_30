@@ -42,7 +42,7 @@ async def client() -> AsyncClient:
 
 @pytest_asyncio.fixture
 async def test_recipe(session):
-    recipe = Recipe(
+    recipe = Recipes(
         title="Test Recipe",
         cooking_time=30,
         ingredients="Test ingredients",
