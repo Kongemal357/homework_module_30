@@ -3,51 +3,8 @@ from httpx import AsyncClient
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app import app
-from src.database import Base, get_session
-from src.models import Recipes
+from src.conftest import client, test_recipe
 
-
-@pytest.fixture(scope="function")
-async def db_session():
-    test_engine = create_async_engine("sqlite+aiosqlite:///:memory:")
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    
-    async_session = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
-    async with async_session() as session:
-        yield session
-    
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-    await test_engine.dispose()
-
-@pytest.fixture
-async def client(db_session):
-    async def override_get_session():
-        yield db_session
-
-    app.dependency_overrides[get_session] = override_get_session
-    
-    async with AsyncClient(app=app, base_url="http://test") as test_client:
-        yield test_client
-    
-    app.dependency_overrides.clear()
-
-@pytest.fixture
-async def test_recipe(db_session):
-    recipe = Recipes(
-        title="Test Recipe",
-        cooking_time=30,
-        ingredients="Test ingredients",
-        description="Test description",
-        views=0
-    )
-    db_session.add(recipe)
-    await db_session.commit()
-    return recipe
-
-# Тесты
 @pytest.mark.asyncio
 async def test_post_recipe(client):
     """Тестируем POST /recipes"""
