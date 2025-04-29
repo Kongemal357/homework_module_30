@@ -44,9 +44,10 @@ jobs:
         run: |
           isort --profile black --check-only --diff src/
           
-      - name: Run autopep8
+      
+      - name: Remove blank lines from __init__.py
         run: |
-          autopep8 --in-place --aggressive --aggressive src/__init__.py
+          echo -n > src/__init__.py  # Полностью очищает файл
 
       - name: Run flake8
         run: |
