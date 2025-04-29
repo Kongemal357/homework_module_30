@@ -43,11 +43,6 @@ jobs:
       - name: Run isort diff check
         run: |
           isort --profile black --check-only --diff src/
-          
-      
-      - name: Remove blank lines from __init__.py
-        run: |
-          echo -n > src/__init__.py  # Полностью очищает файл
 
       - name: Run flake8
         run: |
